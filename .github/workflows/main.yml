@@ -344,6 +344,44 @@ jobs:
           cross_target_triple: ${{ env.CROSS_TRIPLE }}
 
 
+  build-ppc64le:
+    name: Fedora ppc64le (QEMU)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 50
+      - uses: uraimo/run-on-arch-action@v3
+        name: Build LDC on Fedora ppc64le
+        with:
+          arch: none
+          distro: none
+          base_image: --platform=linux/ppc64le fedora:latest
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${PWD}:/src"
+          install: |
+            dnf -y install cmake ninja-build gcc-c++ llvm-devel llvm-static ldc git curl libcurl-devel
+            ls /usr/bin/llvm-config* || true
+            ls -la /usr/lib/llvm* || true
+          run: |
+            set -eux
+            cd /src
+            cmake --version
+            ninja --version
+            llvm-config --version
+            mkdir ../build
+            cd ../build
+            cmake -G Ninja /src \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DD_COMPILER=ldmd2 \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DLDC_DYNAMIC_COMPILE=OFF
+            ninja -j4 ldc2 ldc2-unittest
+            bin/ldc2 -version
+
   merge-macos:
     name: macOS universal
     runs-on: macos-latest
