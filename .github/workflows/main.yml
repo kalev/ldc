@@ -358,7 +358,7 @@ jobs:
         with:
           arch: none
           distro: none
-          base_image: --platform=linux/ppc64le fedora:latest
+          base_image: --platform=linux/ppc64le fedora:44
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/src"
