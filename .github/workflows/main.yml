@@ -347,7 +347,7 @@ jobs:
   build-ppc64le:
     name: Fedora ppc64le (QEMU)
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:
@@ -372,15 +372,27 @@ jobs:
             cmake --version
             ninja --version
             llvm-config --version
-            mkdir ../build
-            cd ../build
+            
+            # Build bootstrap LDC with distro ldc as host compiler
+            mkdir ../bootstrap-ldc
+            cd ../bootstrap-ldc
             cmake -G Ninja /src \
               -DCMAKE_BUILD_TYPE=Release \
               -DD_COMPILER=ldmd2 \
               -DBUILD_SHARED_LIBS=OFF \
               -DLDC_DYNAMIC_COMPILE=OFF
-            ninja -j4 ldc2 ldc2-unittest
-            bin/ldc2 -version
+            ninja -j4 ldc2
+            bin/ldc2 --version
+            
+            # Build final LDC with shared libs using bootstrap ldc
+            mkdir ../build
+            cd ../build
+            cmake -G Ninja /src \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DD_COMPILER=$PWD/../bootstrap-ldc/bin/ldmd2 \
+              -DBUILD_SHARED_LIBS=ON
+            ninja -j4 ldc2
+            bin/ldc2 --version
 
   merge-macos:
     name: macOS universal
