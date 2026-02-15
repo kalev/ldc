@@ -363,7 +363,7 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/src"
           install: |
-            dnf -y install cmake ninja-build gcc-c++ llvm-devel llvm-static ldc git curl libcurl-devel
+            dnf -y install cmake ninja-build gcc-c++ llvm-devel llvm-static ldc git curl libcurl-devel compiler-rt
             ls /usr/bin/llvm-config* || true
             ls -la /usr/lib/llvm* || true
           run: |
